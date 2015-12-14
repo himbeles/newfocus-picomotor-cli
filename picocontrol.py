@@ -1,0 +1,103 @@
+﻿# -*- coding: utf-8 -*-
+"""
+(Luis 2015)
+Terminal to interact with the New Focus Open-Loop Picomotor Controller via Telnet
+
+Requires Python 2.X
+"""
+
+import telnetlib
+import time
+
+host = "192.168.1.13"
+
+def get_drive():
+    drive_input = raw_input("Which drive: 1 or 2? ")
+    while (drive_input != "1") and (drive_input != '2'):
+        drive_input = raw_input("This drive does not exist. Pick drive 1 or 2: ")
+    drive = int(drive_input)
+    return drive
+
+def get_motor():
+    motor_set = 0
+    while not motor_set:
+        motor_input = raw_input("Which motor: a, b, or c? ")
+        if motor_input=='0' or motor_input=='a' or motor_input=='A':
+            motor_set = 1
+            motor = 0
+        elif motor_input=='1' or motor_input=='b' or motor_input=='B':
+            motor_set = 1
+            motor = 1
+        elif motor_input=='2' or motor_input=='c' or motor_input=='C':
+            motor_set = 1
+            motor = 2
+        else: print('This motor does not exist.')
+    return motor
+
+def get_steps():
+    steps_set = 0
+    while not steps_set:
+        steps_input = input("How many steps (pos. or neg. integer)? ")
+        if isinstance(steps_input,int):
+            steps = steps_input
+            steps_set = 1
+    return steps
+    
+def get_movement_params():
+    drive = get_drive()
+    motor = get_motor()
+    steps = get_steps()            
+    return (drive,motor,steps)
+
+def print_movement_info(drive,motor,steps):
+    print("New movement parameters: drive " + str(drive) + ", motor " + str(motor) + ", steps " + str(steps))
+    
+def do_movement(drive,motor,steps):
+    tn = telnetlib.Telnet(host)
+    
+    def wait():
+        delay = 0.1
+        time.sleep(delay)
+        
+    def move_relative(drive,motor,steps):
+        tn.write(b"chl a" + str(drive).encode('ascii') + b"=" + str(motor).encode('ascii') + b"\n")
+        wait()
+        tn.write(b"rel a" + str(drive).encode('ascii') + b"=" + str(steps).encode('ascii') + b"\n")
+        wait()
+        tn.write(b"go\n")
+        wait()
+        
+    move_relative(drive,motor,steps)
+    
+    tn.close()
+    
+    print("  -------> MOVEMENT DONE: drive " + str(drive) + ", motor " + str(motor) + ", steps " + str(steps))    
+
+
+    
+print("***************************************************")    
+print("**  Pico mount control interface (Luis 12/2015)  **")
+print("***************************************************")
+
+(drive,motor,steps) = get_movement_params()
+do_movement(drive,motor,steps)
+
+loop = True
+while(loop):
+    nextstep = raw_input("go [g], change no. of steps [s], change all movement parameters [p], or exit [q]? ")
+    if nextstep == 'g':
+        loop = True
+        do_movement(drive,motor,steps)
+    elif nextstep == 'p':
+        loop = True
+        (drive,motor,steps) = get_movement_params()
+        print_movement_info(drive,motor,steps)    
+    elif nextstep == 's':
+        loop = True
+        steps = get_steps()
+        print_movement_info(drive,motor,steps)
+    elif nextstep == 'q':
+        loop = False
+    else: 
+        print("Invalid answer.")        
+        loop = True

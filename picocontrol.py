@@ -3,25 +3,37 @@
 (Luis 2015)
 Terminal to interact with the New Focus Open-Loop Picomotor Controller via Telnet
 
-Requires Python 2.X
+Requires Python 2.X or 3.X
 """
+
+host = "192.168.1.13"
+
+# redefine the input method to raw_input if needed for Python 2.X
+try: input = raw_input
+except NameError: pass
 
 import telnetlib
 import time
 
-host = "192.168.1.13"
-
 def get_drive():
-    drive_input = raw_input("Which drive: 1 or 2? ")
+    """
+    ask user which drive of the controller should be used
+    return its index
+    """
+    drive_input = input("Which drive: 1 or 2? ")
     while (drive_input != "1") and (drive_input != '2'):
-        drive_input = raw_input("This drive does not exist. Pick drive 1 or 2: ")
+        drive_input = input("This drive does not exist. Pick drive 1 or 2: ")
     drive = int(drive_input)
     return drive
 
 def get_motor():
+    """
+    ask user which motor port of the selected drive of the controller should be used
+    return its index
+    """
     motor_set = 0
     while not motor_set:
-        motor_input = raw_input("Which motor: a, b, or c? ")
+        motor_input = input("Which motor: a, b, or c? ")
         if motor_input=='0' or motor_input=='a' or motor_input=='A':
             motor_set = 1
             motor = 0
@@ -35,15 +47,24 @@ def get_motor():
     return motor
 
 def get_steps():
+    """
+    ask user how many steps the selected motor should do
+    return the number of steps
+    """
     steps_set = 0
     while not steps_set:
-        steps_input = input("How many steps (pos. or neg. integer)? ")
-        if isinstance(steps_input,int):
+        try:
+            steps_input = int(input("How many steps (pos. or neg. integer)? "))
             steps = steps_input
             steps_set = 1
+        except ValueError:
+            print("Not a valid positive or negative integer.")
     return steps
     
 def get_movement_params():
+    """
+    ask for all movement parameters
+    """
     drive = get_drive()
     motor = get_motor()
     steps = get_steps()            
@@ -53,6 +74,9 @@ def print_movement_info(drive,motor,steps):
     print("New movement parameters: drive " + str(drive) + ", motor " + str(motor) + ", steps " + str(steps))
     
 def do_movement(drive,motor,steps):
+    """
+    sends a movement command to the controller via Telnet
+    """
     tn = telnetlib.Telnet(host)
     
     def wait():
@@ -80,11 +104,11 @@ print("**  Pico mount control interface (Luis 12/2015)  **")
 print("***************************************************")
 
 (drive,motor,steps) = get_movement_params()
-do_movement(drive,motor,steps)
+print_movement_info(drive,motor,steps)
 
 loop = True
 while(loop):
-    nextstep = raw_input("go [g], change no. of steps [s], change all movement parameters [p], or exit [q]? ")
+    nextstep = input("go [g], change no. of steps [s], change all movement parameters [p], or exit [q]? ")
     if nextstep == 'g':
         loop = True
         do_movement(drive,motor,steps)

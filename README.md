@@ -4,4 +4,4 @@ To launch the Terminal, execute
 ```
 python picocontrol.py
 ```
-(requires Python 2.X)
+(requires Python 2.X or 3.X)

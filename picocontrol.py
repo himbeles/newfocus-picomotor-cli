@@ -1,16 +1,10 @@
 ﻿# -*- coding: utf-8 -*-
 """
-(Luis 2015)
-Terminal to interact with the New Focus Open-Loop Picomotor Controller via Telnet
-
-Requires Python 2.X or 3.X
+CLI to interact with the New Focus Open-Loop Picomotor Controller via Telnet
+(Luis R. 2015)
 """
 
 host = "192.168.1.13"
-
-# redefine the input method to raw_input if needed for Python 2.X
-try: input = raw_input
-except NameError: pass
 
 import telnetlib
 import time
@@ -100,7 +94,7 @@ def do_movement(drive,motor,steps):
 
     
 print("***************************************************")    
-print("**  Pico mount control interface (Luis 12/2015)  **")
+print("**         Picomotor control interface           **")
 print("***************************************************")
 
 (drive,motor,steps) = get_movement_params()
